@@ -1,19 +1,27 @@
--- Função para impedir que o jogador sente
-local function preventSitting()
-    local player = game.Players.LocalPlayer
-    player.CharacterAdded:Connect(function(character)
-        -- Espera pelo "Humanoid" no personagem
-        local humanoid = character:WaitForChild("Humanoid")
+local players = game:GetService("Players")
+local serverStorage = game:GetService("ServerStorage")
 
-        -- Monitorando mudanças de estado no Humanoid
-        humanoid.StateChanged:Connect(function(_, newState)
-            if newState == Enum.HumanoidStateType.Seated then
-                -- Forçar o jogador a sair do estado "sentado"
-                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+-- Lista de armas para dar ao jogador
+local armas = {"AK47", "IA2", "UZI"}
+
+local function darItens(jogador)
+    local character = jogador.Character or jogador.CharacterAdded:Wait()
+    local backpack = jogador:FindFirstChild("Backpack")
+    
+    if backpack then
+        for _, arma in ipairs(armas) do
+            local item = serverStorage:FindFirstChild(arma)
+            if item then
+                local clone = item:Clone()
+                clone.Parent = backpack
             end
-        end)
-    end)
+        end
+    end
 end
 
--- Ativando o script
-preventSitting()
+-- Dá os itens quando o jogador entra
+players.PlayerAdded:Connect(function(jogador)
+    jogador.CharacterAdded:Connect(function()
+        darItens(jogador)
+    end)
+end)
